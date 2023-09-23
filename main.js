@@ -49,28 +49,14 @@ function startCountdown(seconds) {
 
 async function startRecording() {
     try {
-        const screenOptions = { video: { mediaSource: 'screen' } };
-
-        // Include audio streams if available.
-        if (audioStream) {
-            screenOptions.audio = {
-                mandatory: {
-                    chromeMediaSource: 'desktop',
-                    chromeMediaSourceId: screenStream.id,
-                },
-            };
-        }
+        const screenOptions = {
+            video: { mediaSource: 'screen' },
+            audio: true, // Enable audio (microphone and system audio).
+        };
 
         screenStream = await navigator.mediaDevices.getDisplayMedia(screenOptions);
 
-        // Merge screen and audio streams into one stream.
-        const recordedStream = new MediaStream();
-        screenStream.getTracks().forEach(track => recordedStream.addTrack(track));
-        if (audioStream) {
-            audioStream.getTracks().forEach(track => recordedStream.addTrack(track));
-        }
-
-        mediaRecorder = new MediaRecorder(recordedStream);
+        mediaRecorder = new MediaRecorder(screenStream);
         mediaRecorder.ondataavailable = (event) => {
             if (event.data.size > 0) {
                 recordedChunks.push(event.data);
